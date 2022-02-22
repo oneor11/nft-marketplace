@@ -637,9 +637,9 @@
 	},
 	"sources": {
 		"contracts/art_registry.sol": {
-			"keccak256": "0xe60e39c5ebbce70d729a9dabc41e80407e3115a0a4ed4e4a3fcc4f66c9ff5f46",
+			"keccak256": "0xca11333fdbf1c94063e6b8b97d93c58556f3fa833cc9a03f8d95a49c598b2ba3",
 			"urls": [
-				"bzzr://cd6df076a8b053f4c944a5a86b96a124e2bf9d115dde2a104f5b3de07309a605"
+				"bzzr://5e9f6257755a98add595f8f68ec3de23cad6ce2d6d9eb2d73da7b99bfd289900"
 			]
 		},
 		"https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/GSN/Context.sol": {
