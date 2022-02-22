@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
 
-from helper_functions import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
+from pinata import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
 load_dotenv()
 
@@ -22,7 +22,7 @@ w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
 def load_contract():
 
     # Load the contract ABI
-    with open(Path("contracts/contract_abi.json")) as f:
+    with open(Path("./contracts/compiled/contract_abi.json")) as f:
         contract_abi = json.load(f)
 
     # Set the contract address (this is the address of the deployed contract)
