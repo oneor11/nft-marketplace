@@ -39,3 +39,15 @@ def pin_json_to_ipfs(json):
     print(r.json())
     ipfs_hash = r.json()["IpfsHash"]
     return ipfs_hash
+
+def get_pins():
+    r = requests.get(
+        "https://api.pinata.cloud/data/pinList",
+        headers=json_headers
+    )
+    pin_hashes = r.json()["rows"]
+    my_list = []
+    for row in pin_hashes:
+        if(row['ipfs_pin_hash'].startswith('Qm')):
+            my_list.append(f"https://gateway.pinata.cloud/ipfs/{row['ipfs_pin_hash']}")
+    return my_list

@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
 
-from pinata import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
+from pinata import get_pins, pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
 load_dotenv()
 
@@ -150,3 +150,7 @@ if st.button("Get Appraisal Reports"):
             st.write(report_dictionary["args"])
     else:
         st.write("This artwork has no new appraisals")
+
+if st.button("Get Pins"):
+    pin_hashes = get_pins()
+    st.write(pin_hashes)
