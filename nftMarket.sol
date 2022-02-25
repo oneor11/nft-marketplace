@@ -50,7 +50,7 @@ contract nftMarket is ReentrancyGuard {
     }
 
 
-    function setListingPrice(uint _price) public {
+    function setListingPrice(uint _price) public returns (uint256) {
         listingPrice = _price;
         return listingPrice;
     }
@@ -90,8 +90,8 @@ contract nftMarket is ReentrancyGuard {
             itemId, 
             nftContract, 
             tokenId, 
-            msg.sender, 
-            address(0),  // address is zero because it hasn't been sold yet
+            payable(msg.sender), 
+            payable(address(0)),  // address is zero because it hasn't been sold yet
             price,
             false);
         }
@@ -124,7 +124,7 @@ contract nftMarket is ReentrancyGuard {
             uint itemCount = _itemIds.current(); // total number of items ever Created
 
             // total number of items that are unsold  = total number of items created - total number of items ever sold
-            uint unsoldItemCount = _itemIds.current() - _itemsSold.current();
+            uint unsoldItemCount = _itemIds.current() - _itemSold.current();
             uint currentIndex = 0;
 
           //  Instanciate or Craete an array of MarketItem
@@ -135,16 +135,14 @@ contract nftMarket is ReentrancyGuard {
                 // check if the item has not been sold
                 // by checking if the owner field is empty
                 if(idMarketItem[i+1].owner == address(0)){
-                 // yes, this item has never been sold
-                 uint currentId = idMarketItem[i+1].itemId;
-                 MarketItem storage currentItem = idMarketItem[currentId];
-                 items[currentIndex] = currentItem;
-                 currentIndex += 1;
-
+                    // yes, this item has never been sold
+                    uint currentId = idMarketItem[i+1].itemId;
+                    MarketItem storage currentItem = idMarketItem[currentId];
+                    items[currentIndex] = currentItem;
+                    currentIndex += 1;
+                }
             }
-
             return items; //return array of all unsold items
-        }
         }
 
     /// @notice fetch the list of NFT's bought by the user
