@@ -1,5 +1,6 @@
 import os
 import json
+from hexbytes import HexBytes
 from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
@@ -18,15 +19,11 @@ w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
 # 2. Connects to the contract using the contract address and ABI
 ###################################################################################################
 
-@st.cache(allow_output_mutation=True)
-def load_contract():
+def load_contract(abi_file_path, contract_address):
 
     # Load the contract ABI
-    with open(Path("./Contracts/Compiled/contract_abi.json")) as f:
+    with open(Path(abi_file_path)) as f:
         contract_abi = json.load(f)
-
-    # Set the contract address (this is the address of the deployed contract)
-    contract_address = os.getenv("SMART_CONTRACT_ADDRESS")
 
     # Get the contract
     contract = w3.eth.contract(
@@ -36,121 +33,92 @@ def load_contract():
 
     return contract
 
-# Load the contract
-contract = load_contract()
 
-###################################################################################################
-# Helper Functions to Pin Files and json to Pinata
-###################################################################################################
-
-def pin_artwork(artwork_name, artwork_file):
+def pin_artwork(artwork_file):
     # Pin the file to IPFS with Pinata
     ipfs_file_hash = pin_file_to_ipfs(artwork_file.getvalue())
 
-    # Build a token metadata file for the artwork
-    token_json = {
-        "name": artwork_name,
-        "image": ipfs_file_hash
-    }
-    json_data = convert_data_to_json(token_json)
+    return ipfs_file_hash
 
-    # Pin the json to IPFS with Pinata
-    json_ipfs_hash = pin_json_to_ipfs(json_data)
+def mint_token(nft_contract):
+    transaction = nft_contract.functions.createToken(artwork_uri)
+    tx_hash = transaction.transact({"from": address, "gas": 1000000})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    rich_logs = nft_contract.events.TokenCreated().processReceipt(receipt)
+    token_id = rich_logs[0]['args']['itemId']
 
-    return json_ipfs_hash
+    return token_id
 
-def pin_appraisal_report(report_content):
-    json_report = convert_data_to_json(report_content)
-    report_ipfs_hash = pin_json_to_ipfs(json_report)
-    return report_ipfs_hash
+def create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price):
+    transaction = marketplace_contract.functions.createMarketItem(
+        nft_contract_address, int(token_id), int(price))
+    tx_hash = transaction.transact({"from": address, "gas": 1000000, "value": int(listing_price)})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    rich_logs = marketplace_contract.events.MarketItemCreated().processReceipt(receipt)
+    item_id  = rich_logs[0]['args']['itemId']
+    return item_id
 
-st.title("Art Registry Appraisal System")
+# Load the contracts
+nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
+nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", nft_contract_address)
+marketplace_contract = load_contract("./Contracts/Compiled/nft_marketplace_abi.json", os.getenv("NFT_MARKET_CONTRACT_ADDRESS"))
+
+st.title("# Blockhead NFT MarketPlace")
 st.write("Choose an account to get started")
 accounts = w3.eth.accounts
 address = st.selectbox("Select Account", options=accounts)
 st.markdown("---")
 
-###################################################################################################
-# Register New Artwork
-###################################################################################################
 
-st.markdown("## Register New Artwork")
-artwork_name = st.text_input("Enter the name of the artwork")
-artist_name = st.text_input("Enter the artist name")
-initial_appraisal_value = st.text_input("Enter the initial appraisal value")
+
+# CREATOR: Upload, mint, and put the item up for sale
+st.markdown("## CREATOR SECTION")
+
+st.markdown("### Put your artwork up for sale!")
 file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
-if st.button("Register Artwork"):
-    artwork_ipfs_hash = pin_artwork(artwork_name, file)
-    artwork_uri = f"ipfs://{artwork_ipfs_hash}"
-    tx_hash = contract.functions.registerArtwork(
-        address,
-        artwork_name,
-        artist_name,
-        int(initial_appraisal_value),
-        artwork_uri
-    ).transact({"from": address, "gas": 1000000})
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    st.write("Transaction Receipt Mined:")
-    st.write(dict(receipt))
-    st.write("You can view the pinned metadata file with the following IPFS Gateway Link")
-    st.markdown(f"[Artwork IPFS Gateway Link](https://ipfs.io/ipfs/{artwork_ipfs_hash})")
-st.markdown("---")
+price = st.text_input("Set the Price")
 
-###################################################################################################
-# Appraise Art
-###################################################################################################
-
-st.markdown("## Appraise Artwork")
-tokens = contract.functions.totalSupply().call()
-token_id = st.selectbox("Choose an Art Token ID", list(range(tokens)))
-new_appraisal_value = st.text_input("Enter the new appraisal value")
-appraisal_report_content = st.text_area("Enter details for the Appraisal Report")
-if st.button("Appraise Artwork"):
-
-    # Use Pinata to pin an appraisal report for the report URI
-    appraisal_report_ipfs_hash = pin_appraisal_report(appraisal_report_content)
-    report_uri = f"ipfs://{appraisal_report_ipfs_hash}"
-
-    # Use the token_id and the report_uri to record the appraisal
-    tx_hash = contract.functions.newAppraisal(
-        token_id,
-        int(new_appraisal_value),
-        report_uri
-    ).transact({"from": w3.eth.accounts[0]})
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    st.write(receipt)
-st.markdown("---")
-
-###################################################################################################
-# Get Appraisals
-###################################################################################################
-
-st.markdown("## Get the appraisal report history")
-art_token_id = st.number_input("Artwork ID", value=0, step=1)
-if st.button("Get Appraisal Reports"):
-    appraisal_filter = contract.events.Appraisal.createFilter(
-        fromBlock=0, argument_filters={"tokenId": art_token_id}
-    )
-    reports = appraisal_filter.get_all_entries()
-    if reports:
-        for report in reports:
-            report_dictionary = dict(report)
-            st.markdown("### Appraisal Report Event Log")
-            st.write(report_dictionary)
-            st.markdown("### Pinata IPFS Report URI")
-            report_uri = report_dictionary["args"]["reportURI"]
-            report_ipfs_hash = report_uri[7:]
-            st.markdown(
-                f"The report is located at the following URI: "
-                f"{report_uri}"
-            )
-            st.write("You can also view the report URI with the following ipfs gateway link")
-            st.markdown(f"[IPFS Gateway Link](https://ipfs.io/ipfs/{report_ipfs_hash})")
-            st.markdown("### Appraisal Event Details")
-            st.write(report_dictionary["args"])
+if st.button("Register artwork and put it up for sale"):
+    try: # to upload the file
+        artwork_ipfs_hash = pin_artwork(file)
+        artwork_uri = f"{artwork_ipfs_hash}"
+    except:
+        st.write("File upload failed.")
     else:
-        st.write("This artwork has no new appraisals")
+        try:
+            token_id = mint_token(nft_contract)  # mint the nft
+            # TODO: replace the following line with the contract call that gets the listing
+            listing_price = 35000000000000000
+            item_id = create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price)
+        except Exception as e:
+            st.write("Create token failed.")
+            if hasattr(e, 'message'):
+                st.write(e.message)
+            else:
+                st.write(e)
+        else:
+            st.markdown("**Success!**")
+            st.write(f"Token Id: {token_id}  Blockhead Id: {item_id}")
+            st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
+            st.markdown("---")
 
-if st.button("Get Pins"):
-    pin_hashes = get_pins()
-    st.write(pin_hashes)
+st.markdown("### Items you have for sale")
+
+if st.button("fetchItemsCreated"):
+    mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
+    data = mp_fetch_items_transaction.call()
+    st.write(data)
+
+
+st.markdown("### Misc functions in test")
+if st.button("get uri quick and dirty"):
+    transaction = nft_contract.functions.tokenURI(2)
+    uri = transaction.call()
+    st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
+
+
+
+if st.button("fetchMarketItems"):
+    mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
+    data = mp_items_transaction.call()
+    st.write(data)
