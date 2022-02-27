@@ -41,6 +41,7 @@ def pin_artwork(artwork_file):
     return ipfs_file_hash
 
 
+
 # Load the contracts
 nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", os.getenv("NFT_CONTRACT_ADDRESS"))
 marketplace_contract = load_contract("./Contracts/Compiled/nft_marketplace_abi.json", os.getenv("NFT_MARKET_CONTRACT_ADDRESS"))
@@ -52,12 +53,13 @@ address = st.selectbox("Select Account", options=accounts)
 st.markdown("---")
 
 
+# CREATOR: Upload and mint the artwork
 st.markdown("## Register New Artwork")
 file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
 if st.button("Register Artwork"):
     try: # to upload the file
         artwork_ipfs_hash = pin_artwork(file)
-        artwork_uri = f"ipfs://{artwork_ipfs_hash}"
+        artwork_uri = f"{artwork_ipfs_hash}"
     except:
         st.write("File upload failed.")
     else:
@@ -66,9 +68,15 @@ if st.button("Register Artwork"):
             tx_hash = transaction.transact({"from": address, "gas": 1000000})
             receipt = w3.eth.waitForTransactionReceipt(tx_hash)
         except:
-            st.write("")
+            st.write("Create token failed.")
         finally:
             st.write("Transaction Receipt Mined:")
             st.write(dict(receipt))
             st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
             st.markdown("---")
+
+
+if st.button("get uri quick and dirty"):
+    transaction = nft_contract.functions.tokenURI(2)
+    uri = transaction.call()
+    st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
