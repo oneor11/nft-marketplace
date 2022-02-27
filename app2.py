@@ -40,35 +40,56 @@ def pin_artwork(artwork_file):
 
     return ipfs_file_hash
 
+def mint_token(nft_contract):
+    transaction = nft_contract.functions.createToken(artwork_uri)
+    tx_hash = transaction.transact({"from": address, "gas": 1000000})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    rich_logs = nft_contract.events.TokenCreated().processReceipt(receipt)
+    token_id = rich_logs[0]['args']['itemId']
 
+    return token_id
+
+def create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price):
+    transaction = marketplace_contract.functions.createMarketItem(
+        nft_contract_address, int(token_id), int(price))
+    tx_hash = transaction.transact({"from": address, "gas": 1000000, "value": int(listing_price)})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    rich_logs = marketplace_contract.events.MarketItemCreated().processReceipt(receipt)
+    item_id  = rich_logs[0]['args']['itemId']
+    return item_id
 
 # Load the contracts
-nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", os.getenv("NFT_CONTRACT_ADDRESS"))
+nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
+nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", nft_contract_address)
 marketplace_contract = load_contract("./Contracts/Compiled/nft_marketplace_abi.json", os.getenv("NFT_MARKET_CONTRACT_ADDRESS"))
 
-st.title("Art Registry Appraisal System")
+st.title("# Blockhead NFT MarketPlace")
 st.write("Choose an account to get started")
 accounts = w3.eth.accounts
 address = st.selectbox("Select Account", options=accounts)
 st.markdown("---")
 
 
-# CREATOR: Upload and mint the artwork
-st.markdown("## Register New Artwork")
+
+# CREATOR: Upload, mint, and put the item up for sale
+st.markdown("## CREATOR SECTION")
+
+st.markdown("### Put your artwork up for sale!")
 file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
-if st.button("Register Artwork"):
+price = st.text_input("Set the Price")
+
+if st.button("Register artwork and put it up for sale"):
     try: # to upload the file
         artwork_ipfs_hash = pin_artwork(file)
         artwork_uri = f"{artwork_ipfs_hash}"
     except:
         st.write("File upload failed.")
     else:
-        try: # to mint the nft
-            transaction = nft_contract.functions.createToken(artwork_uri)
-            tx_hash = transaction.transact({"from": address, "gas": 1000000})
-            receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-            rich_logs = nft_contract.events.TokenCreated().processReceipt(receipt)
-            tokenId = rich_logs[0]['args']['itemId']
+        try:
+            token_id = mint_token(nft_contract)  # mint the nft
+            # TODO: replace the following line with the contract call that gets the listing
+            listing_price = 35000000000000000
+            item_id = create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price)
         except Exception as e:
             st.write("Create token failed.")
             if hasattr(e, 'message'):
@@ -76,22 +97,25 @@ if st.button("Register Artwork"):
             else:
                 st.write(e)
         else:
-            st.write(f"Token Id: {tokenId}")
-            st.write("Transaction Receipt Mined:")
-            st.write(dict(receipt))
+            st.markdown("**Success!**")
+            st.write(f"Token Id: {token_id}  Blockhead Id: {item_id}")
             st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
             st.markdown("---")
 
-
-if st.button("get uri quick and dirty"):
-    transaction = nft_contract.functions.tokenURI(2)
-    uri = transaction.call()
-    st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
+st.markdown("### Items you have for sale")
 
 if st.button("fetchItemsCreated"):
     mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
     data = mp_fetch_items_transaction.call()
     st.write(data)
+
+
+st.markdown("### Misc functions in test")
+if st.button("get uri quick and dirty"):
+    transaction = nft_contract.functions.tokenURI(2)
+    uri = transaction.call()
+    st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
+
 
 
 if st.button("fetchMarketItems"):
