@@ -16,6 +16,9 @@ contract nft is ERC721URIStorage{
         contractAddress = marketplaceAddress;
     }
 
+    event TokenCreated (
+        uint indexed itemId
+    );
 
     /// @notice create a new token
     /// @param tokenURI : tokenURI
@@ -24,17 +27,17 @@ contract nft is ERC721URIStorage{
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
-    _mint(msg.sender, newItemId); // Mint the token
+        _mint(msg.sender, newItemId); // Mint the token
 
-    _setTokenURI(newItemId, tokenURI); // generate the URI
+        _setTokenURI(newItemId, tokenURI); // generate the URI
 
-    // give approval or grant transaction permission to start
-    setApprovalForAll(contractAddress, true);
+        // give approval or grant transaction permission to start
+        setApprovalForAll(contractAddress, true);
 
-    // return token Id
-    return newItemId;
+        emit TokenCreated(newItemId);
 
-
+        // return token Id
+        return newItemId;
     }
 
 }
