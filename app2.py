@@ -67,9 +67,16 @@ if st.button("Register Artwork"):
             transaction = nft_contract.functions.createToken(artwork_uri)
             tx_hash = transaction.transact({"from": address, "gas": 1000000})
             receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        except:
+            rich_logs = nft_contract.events.TokenCreated().processReceipt(receipt)
+            tokenId = rich_logs[0]['args']['itemId']
+        except Exception as e:
             st.write("Create token failed.")
-        finally:
+            if hasattr(e, 'message'):
+                st.write(e.message)
+            else:
+                st.write(e)
+        else:
+            st.write(f"Token Id: {tokenId}")
             st.write("Transaction Receipt Mined:")
             st.write(dict(receipt))
             st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
@@ -80,3 +87,14 @@ if st.button("get uri quick and dirty"):
     transaction = nft_contract.functions.tokenURI(2)
     uri = transaction.call()
     st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
+
+if st.button("fetchItemsCreated"):
+    mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
+    data = mp_fetch_items_transaction.call()
+    st.write(data)
+
+
+if st.button("fetchMarketItems"):
+    mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
+    data = mp_items_transaction.call()
+    st.write(data)
