@@ -59,12 +59,17 @@ def create_market_item(marketplace_contract, nft_contract_address, token_id, pri
     return item_id
 
 def buy_nft(marketplace_contract, nft_contract_address, blockhead_id, price_in_wei):
-    nft_contract_addrses = str(nft_contract_address)
+    nft_contract_address = str(nft_contract_address)
     blockhead_id = int(blockhead_id)
     transaction = marketplace_contract.functions.createMarketSale(nft_contract_address, blockhead_id)
     tx_hash = transaction.transact(({"from": address, "gas": 1000000, "value": int(price_in_wei)}))
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     return receipt
+
+def get_nfts_for_sale(marketplace_contract):
+    transaction = marketplace_contract.functions.fetchMarketItems()
+    data = transaction.call()
+    return data
 
 # Load the contracts
 nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
@@ -86,7 +91,7 @@ st.markdown("### Put your artwork up for sale!")
 file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
 price = st.text_input("Set the Price (wei)")
 
-if st.button("Register artwork and put it up for sale (or sold)"):
+if st.button("Register artwork and put it up for sale"):
     try: # to upload the file
         artwork_ipfs_hash = pin_artwork(file)
         artwork_uri = f"{artwork_ipfs_hash}"
@@ -110,7 +115,7 @@ if st.button("Register artwork and put it up for sale (or sold)"):
             st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
             st.markdown("---")
 
-st.markdown("### Items you have for sale")
+st.markdown("### Items you have for sale (or sold)")
 mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
 data = mp_fetch_items_transaction.call()
 st.table(data)
@@ -119,8 +124,7 @@ st.markdown("---")
 st.markdown("## BUYER SECTION")
 
 st.markdown("### Items for sale")
-mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
-data = mp_items_transaction.call()
+data = get_nfts_for_sale(marketplace_contract)
 st.table(data)
 
 st.markdown("### Buy an item")
