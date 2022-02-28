@@ -38,11 +38,11 @@ def load_contract(abi_file_path, contract_address):
 def pin_artwork(artwork_file):
     # Pin the file to IPFS with Pinata
     ipfs_file_hash = pin_file_to_ipfs(artwork_file.getvalue())
-
+    ipfs_file_hash = f"ipfs://{ipfs_file_hash}"
     return ipfs_file_hash
 
-def mint_token(nft_contract):
-    transaction = nft_contract.functions.createToken(artwork_uri)
+def mint_token(nft_contract, uri):
+    transaction = nft_contract.functions.createToken(uri)
     tx_hash = transaction.transact({"from": address, "gas": 1000000})
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     rich_logs = nft_contract.events.TokenCreated().processReceipt(receipt)
@@ -73,6 +73,14 @@ def apply_token_uri(row):
     token_uri = transaction.call()
     return token_uri
 
+def simplify_address(address):
+    """Return the first four and last four of a wallet address"""
+    length = len(address)
+    if length > 8:
+        return f'{address[0:4]}...{address[(length-4):length]}'
+    else:
+        return address
+
 def get_nfts_for_sale(marketplace_contract):
     transaction = marketplace_contract.functions.fetchMarketItems()
     data = transaction.call()
@@ -80,8 +88,23 @@ def get_nfts_for_sale(marketplace_contract):
     unsold_items_df.columns = ['Token Id',  'Contract', 'Blockhead Id', 'Minter', 'Owner', 'Cost', 'Sold']
     unsold_items_df.drop(['Contract'], axis=1, inplace=True)
     unsold_items_df['Token URI'] = unsold_items_df.apply(apply_token_uri, axis=1)
+    unsold_items_df['Minter'] = unsold_items_df.apply(lambda row : simplify_address(row['Minter']), axis=1)
+    unsold_items_df['Owner'] = unsold_items_df.apply(lambda row : simplify_address(row['Owner']), axis=1)
+    unsold_items_df['IPFS URL'] = unsold_items_df.apply(lambda row : convert_ipfs_uri_to_url(row['Token URI']), axis=1)
 
     return unsold_items_df
+
+
+def convert_ipfs_uri_to_url(uri : str):
+    #TODO This should go in a config file
+    ipfs_url = "https://gateway.pinata.cloud/ipfs/"
+
+    if(uri.startswith("ipfs://")):
+        uri = uri.replace("ipfs://", ipfs_url)
+    else:
+        uri = f"{ipfs_url}{uri}"
+
+    return uri
 
 # Load the contracts
 nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
@@ -105,13 +128,12 @@ price = st.text_input("Set the Price (wei)")
 
 if st.button("Register artwork and put it up for sale"):
     try: # to upload the file
-        artwork_ipfs_hash = pin_artwork(file)
-        artwork_uri = f"{artwork_ipfs_hash}"
+        artwork_uri = pin_artwork(file)
     except:
         st.write("File upload failed.")
     else:
         try:
-            token_id = mint_token(nft_contract)  # mint the nft
+            token_id = mint_token(nft_contract, artwork_uri)  # mint the nft
             # TODO: replace the following line with the contract call that gets the listing
             listing_price = 35000000000000000
             item_id = create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price)
@@ -124,7 +146,7 @@ if st.button("Register artwork and put it up for sale"):
         else:
             st.markdown("**Success!**")
             st.write(f"Token Id: {token_id}  Blockhead Id: {item_id}")
-            st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
+            st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link]({convert_ipfs_uri_to_url(artwork_uri)})")
             st.markdown("---")
 
 st.markdown("### Items you have for sale (or sold)")
