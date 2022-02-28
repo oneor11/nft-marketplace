@@ -109,7 +109,7 @@ if st.button("Show items you have for sale"):
     data = mp_fetch_items_transaction.call()
     st.write(data)
 
-
+st.markdown("---")
 st.markdown("## BUYER SECTION")
 
 if st.button("Show items for sale"):
