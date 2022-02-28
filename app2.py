@@ -1,122 +1,20 @@
 import os
-import json
-from hexbytes import HexBytes
-from web3 import Web3
-from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
-import pandas as pd
-
-from pinata import get_pins, pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
+from blockhead.contract_api import BlockheadMarketPlace
+from pinata import pin_artwork
 
 load_dotenv()
 
 # Define and connect a new Web3 provider
-w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
-
-###################################################################################################
-# Contract Helper Function:
-# 1. Loads the contract once using cache
-# 2. Connects to the contract using the contract address and ABI
-###################################################################################################
-
-def load_contract(abi_file_path, contract_address):
-
-    # Load the contract ABI
-    with open(Path(abi_file_path)) as f:
-        contract_abi = json.load(f)
-
-    # Get the contract
-    contract = w3.eth.contract(
-        address=contract_address,
-        abi=contract_abi
-    )
-
-    return contract
-
-
-def pin_artwork(artwork_file):
-    # Pin the file to IPFS with Pinata
-    ipfs_file_hash = pin_file_to_ipfs(artwork_file.getvalue())
-    ipfs_file_hash = f"ipfs://{ipfs_file_hash}"
-    return ipfs_file_hash
-
-def mint_token(nft_contract, uri):
-    transaction = nft_contract.functions.createToken(uri)
-    tx_hash = transaction.transact({"from": address, "gas": 1000000})
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    rich_logs = nft_contract.events.TokenCreated().processReceipt(receipt)
-    token_id = rich_logs[0]['args']['itemId']
-
-    return token_id
-
-def create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price):
-    transaction = marketplace_contract.functions.createMarketItem(
-        nft_contract_address, int(token_id), int(price))
-    tx_hash = transaction.transact({"from": address, "gas": 1000000, "value": int(listing_price)})
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    rich_logs = marketplace_contract.events.MarketItemCreated().processReceipt(receipt)
-    item_id  = rich_logs[0]['args']['itemId']
-    return item_id
-
-def buy_nft(marketplace_contract, nft_contract_address, blockhead_id, price_in_wei):
-    nft_contract_address = str(nft_contract_address)
-    blockhead_id = int(blockhead_id)
-    transaction = marketplace_contract.functions.createMarketSale(nft_contract_address, blockhead_id)
-    tx_hash = transaction.transact(({"from": address, "gas": 1000000, "value": int(price_in_wei)}))
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    return receipt
-
-def apply_token_uri(row):
-    token_id = row["Token Id"]
-    transaction = nft_contract.functions.tokenURI(token_id)
-    token_uri = transaction.call()
-    return token_uri
-
-def simplify_address(address):
-    """Return the first four and last four of a wallet address"""
-    length = len(address)
-    if length > 8:
-        return f'{address[0:4]}...{address[(length-4):length]}'
-    else:
-        return address
-
-def get_nfts_for_sale(marketplace_contract):
-    transaction = marketplace_contract.functions.fetchMarketItems()
-    data = transaction.call()
-    unsold_items_df = pd.DataFrame(data)
-    unsold_items_df.columns = ['Token Id',  'Contract', 'Blockhead Id', 'Minter', 'Owner', 'Cost', 'Sold']
-    unsold_items_df.drop(['Contract'], axis=1, inplace=True)
-    unsold_items_df['Token URI'] = unsold_items_df.apply(apply_token_uri, axis=1)
-    unsold_items_df['Minter'] = unsold_items_df.apply(lambda row : simplify_address(row['Minter']), axis=1)
-    unsold_items_df['Owner'] = unsold_items_df.apply(lambda row : simplify_address(row['Owner']), axis=1)
-    unsold_items_df['IPFS URL'] = unsold_items_df.apply(lambda row : convert_ipfs_uri_to_url(row['Token URI']), axis=1)
-
-    return unsold_items_df
-
-
-def convert_ipfs_uri_to_url(uri : str):
-    #TODO This should go in a config file
-    ipfs_url = "https://gateway.pinata.cloud/ipfs/"
-
-    if(uri.startswith("ipfs://")):
-        uri = uri.replace("ipfs://", ipfs_url)
-    else:
-        uri = f"{ipfs_url}{uri}"
-
-    return uri
-
-# Load the contracts
-nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
-nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", nft_contract_address)
-marketplace_contract = load_contract("./Contracts/Compiled/nft_marketplace_abi.json", os.getenv("NFT_MARKET_CONTRACT_ADDRESS"))
+web3_provider_uri = os.getenv("WEB3_PROVIDER_URI")
+mp = BlockheadMarketPlace(web3_provider_uri)
 
 st.title("Blockheads' NFT MarketPlace")
 st.write("Choose an account to get started")
-accounts = w3.eth.accounts
+accounts = mp.w3.eth.accounts
 address = st.selectbox("Select Account", options=accounts)
 st.markdown("---")
-
 
 
 # CREATOR: Upload, mint, and put the item up for sale
@@ -129,14 +27,18 @@ price = st.text_input("Set the Price (wei)")
 if st.button("Register artwork and put it up for sale"):
     try: # to upload the file
         artwork_uri = pin_artwork(file)
-    except:
+    except Exception as e:
         st.write("File upload failed.")
+        if hasattr(e, 'message'):
+            st.write(e.message)
+        else:
+            st.write(e)
     else:
         try:
-            token_id = mint_token(nft_contract, artwork_uri)  # mint the nft
+            token_id = mp.mint_token(address, artwork_uri)  # mint the nft
             # TODO: replace the following line with the contract call that gets the listing
-            listing_price = 35000000000000000
-            item_id = create_market_item(marketplace_contract, nft_contract_address, token_id, price, listing_price)
+            listing_price = mp.get_listing_price_wei()
+            item_id = mp.create_market_item(address, token_id, price, listing_price)
         except Exception as e:
             st.write("Create token failed.")
             if hasattr(e, 'message'):
@@ -146,31 +48,28 @@ if st.button("Register artwork and put it up for sale"):
         else:
             st.markdown("**Success!**")
             st.write(f"Token Id: {token_id}  Blockhead Id: {item_id}")
-            st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link]({convert_ipfs_uri_to_url(artwork_uri)})")
+            st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link]({mp.convert_ipfs_uri_to_url(artwork_uri)})")
             st.markdown("---")
 
-st.markdown("### Items you have for sale (or sold)")
-mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
-data = mp_fetch_items_transaction.call()
-st.table(data)
+st.markdown("### Items you have for sale or have sold")
+show_sold = st.checkbox("Show sold items?")
+account_items_listed_df = mp.get_listed_items_for_account(address, show_sold)
+st.table(account_items_listed_df)
+
+st.markdown("### Items you bought")
+account_bought_items_df = mp.get_bought_items_for_account(address)
+st.table(account_bought_items_df)
 
 st.markdown("---")
 st.markdown("## BUYER SECTION")
 
-st.markdown("### Items for sale")
-data = get_nfts_for_sale(marketplace_contract)
-st.table(data)
+st.markdown("### Items for sale in the Blockheads' MarketPlace")
+items_for_sale_df = mp.get_nfts_for_sale()
+st.table(items_for_sale_df)
 
 st.markdown("### Buy an item")
 blockhead_id = st.text_input("Enter the Blockhead id for the item you like")
 purchase_price = st.text_input("Enter the purchase price.")
 if(st.button("Purchase")):
-    receipt = buy_nft(marketplace_contract, nft_contract_address, blockhead_id, purchase_price)
+    receipt = mp.buy_nft(address, blockhead_id, purchase_price)
     st.write(receipt)
-
-
-st.markdown("### MISC FUNCTIONS IN TEST")
-if st.button("get uri quick and dirty"):
-    transaction = nft_contract.functions.tokenURI(2)
-    uri = transaction.call()
-    st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
