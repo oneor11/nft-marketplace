@@ -102,20 +102,20 @@ if st.button("Register artwork and put it up for sale"):
             st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
             st.markdown("---")
 
+#if st.button("Show items you have for sale"):
 st.markdown("### Items you have for sale")
-
-if st.button("Show items you have for sale"):
-    mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
-    data = mp_fetch_items_transaction.call()
-    st.table(data)
+mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
+data = mp_fetch_items_transaction.call()
+st.table(data)
 
 st.markdown("---")
 st.markdown("## BUYER SECTION")
 
-if st.button("Show items for sale"):
-    mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
-    data = mp_items_transaction.call()
-    st.table(data)
+#if st.button("Show items for sale"):
+st.markdown("### Items for sale")
+mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
+data = mp_items_transaction.call()
+st.table(data)
 
 st.markdown("### MISC FUNCTIONS IN TEST")
 if st.button("get uri quick and dirty"):
