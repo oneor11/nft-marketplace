@@ -415,11 +415,11 @@
 			]
 		},
 		"Contracts/nftMarket.sol": {
-			"keccak256": "0x95b50ebd99cf84a93fdd07f8138cafe4abed683e9be7689d36532e86a41b8684",
+			"keccak256": "0x1b58d2b98cd3dea39d37b4820e574bc6ec2423b3a09f0987a85fc88a355be427",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://59c2b96b696d56e66cc63abef92b2595b3db5a31ecb3fe4851ed18cb4d109ef1",
-				"dweb:/ipfs/QmTeVUCG1G4yYhbKJqbKpUAmAfHweShr6V2MX4gc5mdYpd"
+				"bzz-raw://9ec537ebbf24405047501bcc03c8486478f77177088700af097c9093a4c2faa5",
+				"dweb:/ipfs/QmUagd2iSz8CGMBLRqkJy7FNtRkVVE87bzinsKkPktEhap"
 			]
 		}
 	},

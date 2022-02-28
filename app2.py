@@ -122,3 +122,4 @@ if st.button("fetchMarketItems"):
     mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
     data = mp_items_transaction.call()
     st.write(data)
+
