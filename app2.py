@@ -5,6 +5,7 @@ from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
+import pandas as pd
 
 from pinata import get_pins, pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
@@ -66,10 +67,21 @@ def buy_nft(marketplace_contract, nft_contract_address, blockhead_id, price_in_w
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     return receipt
 
+def apply_token_uri(row):
+    token_id = row["Token Id"]
+    transaction = nft_contract.functions.tokenURI(token_id)
+    token_uri = transaction.call()
+    return token_uri
+
 def get_nfts_for_sale(marketplace_contract):
     transaction = marketplace_contract.functions.fetchMarketItems()
     data = transaction.call()
-    return data
+    unsold_items_df = pd.DataFrame(data)
+    unsold_items_df.columns = ['Token Id',  'Contract', 'Blockhead Id', 'Minter', 'Owner', 'Cost', 'Sold']
+    unsold_items_df.drop(['Contract'], axis=1, inplace=True)
+    unsold_items_df['Token URI'] = unsold_items_df.apply(apply_token_uri, axis=1)
+
+    return unsold_items_df
 
 # Load the contracts
 nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
