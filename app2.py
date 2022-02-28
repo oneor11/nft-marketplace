@@ -58,6 +58,14 @@ def create_market_item(marketplace_contract, nft_contract_address, token_id, pri
     item_id  = rich_logs[0]['args']['itemId']
     return item_id
 
+def buy_nft(marketplace_contract, nft_contract_address, blockhead_id, price_in_wei):
+    nft_contract_addrses = str(nft_contract_address)
+    blockhead_id = int(blockhead_id)
+    transaction = marketplace_contract.functions.createMarketSale(nft_contract_address, blockhead_id)
+    tx_hash = transaction.transact(({"from": address, "gas": 1000000, "value": int(price_in_wei)}))
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    return receipt
+
 # Load the contracts
 nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
 nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", nft_contract_address)
@@ -78,7 +86,7 @@ st.markdown("### Put your artwork up for sale!")
 file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
 price = st.text_input("Set the Price (wei)")
 
-if st.button("Register artwork and put it up for sale"):
+if st.button("Register artwork and put it up for sale (or sold)"):
     try: # to upload the file
         artwork_ipfs_hash = pin_artwork(file)
         artwork_uri = f"{artwork_ipfs_hash}"
@@ -102,7 +110,6 @@ if st.button("Register artwork and put it up for sale"):
             st.markdown(f"You can view the pinned metadata file with the following IPFS Gateway Link: [Artwork IPFS Gateway Link](https://gateway.pinata.cloud/ipfs/{artwork_ipfs_hash})")
             st.markdown("---")
 
-#if st.button("Show items you have for sale"):
 st.markdown("### Items you have for sale")
 mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
 data = mp_fetch_items_transaction.call()
@@ -111,11 +118,18 @@ st.table(data)
 st.markdown("---")
 st.markdown("## BUYER SECTION")
 
-#if st.button("Show items for sale"):
 st.markdown("### Items for sale")
 mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
 data = mp_items_transaction.call()
 st.table(data)
+
+st.markdown("### Buy an item")
+blockhead_id = st.text_input("Enter the Blockhead id for the item you like")
+purchase_price = st.text_input("Enter the purchase price.")
+if(st.button("Purchase")):
+    receipt = buy_nft(marketplace_contract, nft_contract_address, blockhead_id, purchase_price)
+    st.write(receipt)
+
 
 st.markdown("### MISC FUNCTIONS IN TEST")
 if st.button("get uri quick and dirty"):
