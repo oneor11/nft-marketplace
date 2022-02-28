@@ -76,7 +76,7 @@ st.markdown("## CREATOR SECTION")
 
 st.markdown("### Put your artwork up for sale!")
 file = st.file_uploader("Upload Artwork", type=["jpg", "jpeg", "png"])
-price = st.text_input("Set the Price")
+price = st.text_input("Set the Price (wei)")
 
 if st.button("Register artwork and put it up for sale"):
     try: # to upload the file
@@ -107,7 +107,7 @@ st.markdown("### Items you have for sale")
 if st.button("Show items you have for sale"):
     mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
     data = mp_fetch_items_transaction.call()
-    st.write(data)
+    st.table(data)
 
 st.markdown("---")
 st.markdown("## BUYER SECTION")
@@ -115,7 +115,7 @@ st.markdown("## BUYER SECTION")
 if st.button("Show items for sale"):
     mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
     data = mp_items_transaction.call()
-    st.write(data)
+    st.table(data)
 
 st.markdown("### MISC FUNCTIONS IN TEST")
 if st.button("get uri quick and dirty"):
