@@ -63,7 +63,7 @@ nft_contract_address = os.getenv("NFT_CONTRACT_ADDRESS")
 nft_contract = load_contract("./Contracts/Compiled/nft_abi.json", nft_contract_address)
 marketplace_contract = load_contract("./Contracts/Compiled/nft_marketplace_abi.json", os.getenv("NFT_MARKET_CONTRACT_ADDRESS"))
 
-st.title("# Blockhead NFT MarketPlace")
+st.title("Blockheads' NFT MarketPlace")
 st.write("Choose an account to get started")
 accounts = w3.eth.accounts
 address = st.selectbox("Select Account", options=accounts)
@@ -104,21 +104,21 @@ if st.button("Register artwork and put it up for sale"):
 
 st.markdown("### Items you have for sale")
 
-if st.button("fetchItemsCreated"):
+if st.button("Show items you have for sale"):
     mp_fetch_items_transaction = marketplace_contract.functions.fetchItemsCreated()
     data = mp_fetch_items_transaction.call()
     st.write(data)
 
 
-st.markdown("### Misc functions in test")
+st.markdown("## BUYER SECTION")
+
+if st.button("Show items for sale"):
+    mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
+    data = mp_items_transaction.call()
+    st.write(data)
+
+st.markdown("### MISC FUNCTIONS IN TEST")
 if st.button("get uri quick and dirty"):
     transaction = nft_contract.functions.tokenURI(2)
     uri = transaction.call()
     st.write(f"Uri: https://gateway.pinata.cloud/ipfs/{uri}")
-
-
-
-if st.button("fetchMarketItems"):
-    mp_items_transaction = marketplace_contract.functions.fetchMarketItems()
-    data = mp_items_transaction.call()
-    st.write(data)
