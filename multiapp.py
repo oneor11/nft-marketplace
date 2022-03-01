@@ -39,8 +39,8 @@ class MultiApp:
         })
 
     def run(self):
-        # app = st.sidebar.radio(
-        app = st.selectbox(
+        app = st.sidebar.radio(
+        # app = st.selectbox(
             'Navigation',
             self.apps,
             format_func=lambda app: app['title'])
