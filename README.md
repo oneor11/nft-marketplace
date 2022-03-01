@@ -90,3 +90,41 @@ Let's finish by installing the IPFS Browser Extension:
 If you’d like the ability to display IPFS links directly in the browser in addition to displaying them on the Pinata website, you can install a web browser extension. With the extension, you’ll be able to connect directly to IPFS links. To do this, go to the **[IPFS Companion](https://github.com/ipfs/ipfs-companion#install-ipfs-companion)** GitHub repository, and then follow the installation steps for your browser.
 
 We are now done with all of the installations we need to run our application. 
+
+---
+
+## Usage Guide
+
+We need to begin with our connections to Ganache and MetaMask. We will be using Ganache as our test blockchain and MetaMask as our EOA (Externally Owned Account). We use MetaMask for its decentralized nature. 
+
+Open a new instance of Ganache and select `QUICKSTART` as the following image shows:
+
+![Ganache Quickstart](images/ganache_quickstart.png)
+
+We now need to connect Ganache to MetaMask. 
+
+We do so by clicking on the key icon to the right of each Ganache account:
+
+![Ganache Keys](images/ganache_keys.png)
+
+Copy the private key, and then in MetaMask, click on `Import Account`:
+
+![Import Account to MetaMask](images/import_account.png)
+
+Then, paste the private key you copied from the Ganache account:
+
+![Paste Private Key](images/paste_key.png)
+
+Now we have Ganache and MataMask connected. The last connection we need to make is MetaMask to the Remix IDE, where our contracts reside.
+
+We open Remix IDE, verify that our deployer is Injected Web3. We also open MetaMask and a connection request will appear:
+
+![Connect Remix to MetaMask](images/connect_remix.png)
+
+There are 2 main ways to verify if Remix is connected to MetaMask:
+
+![Remix Connected](images/remix_connected.png)
+
+First, below the MetaMask logo, you will see a green dot that says `connected`. Additionally, we know we are connected to Ganache, and Remix because you can see the balance of the account as 100 ETH. You can also see this balance in the `Account` field in the Remix sidebar. 
+
+Congratulations! You have all the required connections to run the application. 
