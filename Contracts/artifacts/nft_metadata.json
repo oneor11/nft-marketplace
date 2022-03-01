@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.12+commit.f00d7308"
+		"version": "0.8.7+commit.e28d00a7"
 	},
 	"language": "Solidity",
 	"output": {
@@ -64,6 +64,19 @@
 					}
 				],
 				"name": "ApprovalForAll",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "itemId",
+						"type": "uint256"
+					}
+				],
+				"name": "TokenCreated",
 				"type": "event"
 			},
 			{
@@ -428,7 +441,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"nft.sol": "nft"
+			"Contracts/nft.sol": "nft"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -530,12 +543,12 @@
 				"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy"
 			]
 		},
-		"nft.sol": {
-			"keccak256": "0x33088b00007b2e0663bf2188cd4205e63742bc0ad0efa27d49c41b854f5a6752",
+		"Contracts/nft.sol": {
+			"keccak256": "0xca6e03d044874383ee173530f2a2653c8cbf92cecd9b8c78cdd26b2f0303f433",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://142329f8faf7c3cc6a98757590d2525cefc5ab508d5b40c14d5ca444b26ac7c9",
-				"dweb:/ipfs/Qmf8VSxQE5dBpcsWzqH7AmZRoYwXNvZQ2kKbhLwMEui5xw"
+				"bzz-raw://a0068b45d7812e6536f775d96083d706b15c2a6662de88e213d306a10291f86d",
+				"dweb:/ipfs/QmWt889Y4zg3BvZdUTFrgqfP7BEorahW5Wy4jwEjt2h5DK"
 			]
 		}
 	},

@@ -16,6 +16,12 @@ file_headers = {
     "pinata_secret_api_key": os.getenv("PINATA_SECRET_API_KEY")
 }
 
+def pin_artwork(artwork_file):
+    # Pin the file to IPFS with Pinata
+    ipfs_file_hash = pin_file_to_ipfs(artwork_file.getvalue())
+    ipfs_file_hash = f"ipfs://{ipfs_file_hash}"
+    return ipfs_file_hash
+
 def convert_data_to_json(content):
     data = {"pinataOptions": {"cidVersion": 1}, "pinataContent": content}
     return json.dumps(data)

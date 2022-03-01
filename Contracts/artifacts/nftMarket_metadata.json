@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.12+commit.f00d7308"
+		"version": "0.8.7+commit.e28d00a7"
 	},
 	"language": "Solidity",
 	"output": {
@@ -312,7 +312,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"nftMarket.sol": "nftMarket"
+			"Contracts/nftMarket.sol": "nftMarket"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -414,12 +414,12 @@
 				"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy"
 			]
 		},
-		"nftMarket.sol": {
-			"keccak256": "0xc4ab921b79a411742a2aa8632ec5ba3f79963164d9f293c2c09c005255e7a086",
+		"Contracts/nftMarket.sol": {
+			"keccak256": "0x774c17ae2b09eedd2ae59cee31e4c864fd0da885a261bca5499e20cf18026a6e",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://aaf598a771a3fdbb868afbce8202a54304f8c3f8b97d0989998991decb7811d7",
-				"dweb:/ipfs/QmdFkHqSUJ9HEa2BQpKz22bT7A3q1rvkqD7x7JUj9DHAjF"
+				"bzz-raw://82bb6f3b7b82e64f8bd6acaf2473eb2aaf4fcee0d9801c91616c40de86b1bb9e",
+				"dweb:/ipfs/QmTDnC9qjfs6AkvFatC2tkpa6UGFdusTANKS8hLbvTn2eo"
 			]
 		}
 	},
