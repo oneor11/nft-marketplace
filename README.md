@@ -208,3 +208,51 @@ Make sure to copy the `Created Contract Address` to place it in your `.env` file
 We now have both of our contracts deployed to our Ganache Test Blockchain. 
 
 We are ready to interact with our contracts via our Streamlit web application. 
+
+In order to launch our Streamlit application, paste the following in your terminal:
+
+`streamlit run app.py`
+
+The application will load and automatically open in a browser window:
+
+![Launching Stremalit](images/streamlit_launch.png)
+
+Now that we have launched Streamlit, we are directly taken to the Home page of our Blockhead's NFT Market Place. 
+
+If we look to the sidebar on the left-hand side, we have 3 options to choose from: Home, Creator, Buyer. We are already on the Home screen, so let's demo the Creator section. Here, we will upload images to be minted as NFTs and automatically put up for sale. 
+
+Let's interact with our application as a creator.
+
+It is extremely important to make note of the MetaMask account we are using to execute the transactions in the app. For this first NFT minting, we will be using the account ending in `478d`.
+This account currently has a 100 ETH balance. 
+
+Let's create our first NFT:
+
+![Mint First NFT](images/mint_first_nft.png)
+
+To begin, we make sure that the selected account matches what we stated above. Since this does, we move on to the upload field. Either drag or browse for the image you want to mint, and price your artwork. In this example, we are pricing our NFT at `50000000000 wei`. Then, click on the `Register artwork and put it up for sale` button. 
+
+Once the artwork has been minted, the marketplace will generate a `token Id` and `Blockhead Id`:
+
+![Blockhead Id](images/blockhead_id.png)
+
+Congrats! We have officially minted our first Blockhead Marketplace NFT. 
+
+Let's have this user mint a second NFT and price it at 10 ETH. This will allow us to quickly verify the funds going from one account to another when the NFT is sold. 
+
+![My Precious Mint](images/my_precious_mint.png)
+
+Just to verify the minting took place, let's see the Token Id and Blockhead Id:
+
+![Blockhead Id 2](images/blockhead_id_two.png)
+
+So now this user, account `478d`, has created 2 NFTs and has them for sale. 
+
+Below the "Put your artwork up sale" section, we'll find the section were we can view the items we have for sale, or have sold:
+
+![Items For Sale](images/nfts_for_sale.png)
+
+From the image, we can see that we have 2 NFTs for sale. This makes sense because we used the same account to mint both NFTs. 
+
+Now that we have seen how to create NFTs and put them up for sale, let's navigate to the buyer's section to see how we can buy the NFTs available for sale. 
+
