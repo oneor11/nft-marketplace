@@ -322,10 +322,10 @@ We have now created and purchased NFTs through the Blockheads' NFT MarketPlace.
 
 ## Contributors
 
-Emmanuel George
-Jacob Rougeau
-Jamie Zarate
-Lindsey Hardouin
+Emmanuel George<br>
+Jacob Rougeau<br>
+Jamie Zarate<br>
+Lindsey Hardouin<br>
 Tony Landero
 
 ---
