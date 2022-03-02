@@ -317,3 +317,19 @@ Finally, we return to the Buyer Section to see how many NFTs there are still for
 We only have 1 NFT remaining for sale. This validates that our marketplace is working. We minted 2 NFTs. Sold one, and we only have one remaining. 
 
 We have now created and purchased NFTs through the Blockheads' NFT MarketPlace. 
+
+---
+
+## Contributors
+
+Emmanuel George
+Jacob Rougeau
+Jamie Zarate
+Lindsey Hardouin
+Tony Landero
+
+---
+
+## License
+
+MIT
