@@ -299,3 +299,21 @@ We can also see the creator's account (`...478d`) and view their new balance to 
 ![MetaMask Creator New Balance](images/account_three_new_balance.png)
 
 `Account ...478d` (Creator's account) has been credited the 10 ETH from the sale of their NFT. The reason that this account is not 110 ETH is because this user had to pay a gas fee in order to upload and mint his artwork as an NFT. That gas fee has been deducted from their account. 
+
+We'll return to the Creator section. Let's select the creator address (`...478d`). In the section "Items you have for sale or have sold", you can see that this user only has 1 NFT left for sale (`Blockhead Id 1`). 
+
+![Account 3 Items Left For Sale](images/account_three_items_left.png)
+
+We can also check the box reading "Show sold items?", to view the NFTs that this creator has sold.
+
+![Account 3 Items Sold](images/account_three_items_sold.png)
+
+From the provided table, we can see that Blockhead Id 1 is still available for sale since it has no owner. We can also see that the Blockhead Id 2 has been sold to account `...a128` and also has `true` under Sold. 
+
+Finally, we return to the Buyer Section to see how many NFTs there are still for sale in our marketplace. 
+
+![MarketPlace Items For Sale](images/marketplace_items_left.png)
+
+We only have 1 NFT remaining for sale. This validates that our marketplace is working. We minted 2 NFTs. Sold one, and we only have one remaining. 
+
+We have now created and purchased NFTs through the Blockheads' NFT MarketPlace. 
