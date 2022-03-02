@@ -256,3 +256,46 @@ From the image, we can see that we have 2 NFTs for sale. This makes sense becaus
 
 Now that we have seen how to create NFTs and put them up for sale, let's navigate to the buyer's section to see how we can buy the NFTs available for sale. 
 
+In the sidebar, select the `Buyer` button to view the Buyer's section of the Blockheads' NFT Marketplace. 
+
+![Buyer's Section](images/buyer_section_two.png)
+
+For this transaction we will select a different account. In the buyers section's `Select Account` field, select the account ending in `a128`. This user will be the buyer of the NFT with Blockhead Id 2.
+
+Below this, we will see the "Items for sale in the Blockheads' MarketPlace" section. This is where we see the NFT's that are for sale. Let's copy the Token IPFS URL and open it in a browser to see the NFT:
+
+![My Precious URL](images/my_precious_uri.png)
+
+We have copied the the NFT's `IPFS URL` and pasted it in a browser wondow to see the image. 
+
+Now, using the Blockhead Id and price, in wei, of the artwork, we can make our purchase in the "Buy an item" section.
+
+![Buy an NFT](images/buy_nft.png)
+
+Click the `Purchase` button to complete the transaction. 
+
+We have plenty of ways to verify the transaction:
+
+1. We can see within the app, the "Items you bought" section. 
+
+![Items You Bought](images/items_you_bought.png)
+
+This chart provides a lot of valuable information. It states the Token and Blockhead Ids, the minter, or creator (`Account ...478d`), the owner (`Account ...a128`), the cost (`10000000000000000000 wei`), and the verification that the NFT has been sold (`true`).
+
+2. We can also see the transaction in Ganache.
+
+![Ganache Buy Confirmation](images/ganache_buy_confirmation.png)
+
+Here we can see the transaction hash, the buyer's address, the nftMarket Contract's address, the amount of gas the transaction used, and the value of the transaction, which matches the price of the NFT. 
+
+3. Finally, we can verify this transaction in MetaMask.
+
+![MetaMask Buyer New Balance](images/account_four_new_balance.png)
+
+`Account ...a128` (Buyer's account) has been debited the 10 ETH, plus the gas cost, used to purchase the NFT. The account started with 100 ETH, and now it has a new balance of 89.99 ETH. 
+
+We can also see the creator's account (`...478d`) and view their new balance to verify transfer of payment for the sale of the NFT.
+
+![MetaMask Creator New Balance](images/account_three_new_balance.png)
+
+`Account ...478d` (Creator's account) has been credited the 10 ETH from the sale of their NFT. The reason that this account is not 110 ETH is because this user had to pay a gas fee in order to upload and mint his artwork as an NFT. That gas fee has been deducted from their account. 
