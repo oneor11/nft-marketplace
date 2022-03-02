@@ -4,7 +4,6 @@ from apps import buyer, home,creator # import your app modules here
 
 app = MultiApp()
 
-# st.markdown("# NFT Market Place")
 
 # Add all your application here
 app.add_app("Home", home.home)
